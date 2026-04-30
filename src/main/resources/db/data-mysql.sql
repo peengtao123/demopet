@@ -17,6 +17,6 @@ INSERT INTO `role` (id, role_name, role_code, description) VALUES
 DELETE FROM `menu`;
 
 INSERT INTO `menu` (id, menu_name, menu_code, parent_id, path, sort, icon) VALUES
-                                                                                (1, '用户管理', 'USER_MANAGE', '0', '/admin', 1, 'bi-people-fill'),
+                                                                                (1, '用户管理', 'USER_MANAGE', '0', '/admin/users', 1, 'bi-people-fill'),
                                                                                 (2, '角色管理', 'ROLE_MANAGE', '0', '/admin/role', 2, 'bi-shield-lock-fill'),
                                                                                 (3, '菜单管理', 'MENU_MANAGE', '0', '/admin/menu', 3, 'bi-menu-button-fill');
