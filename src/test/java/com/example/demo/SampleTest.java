@@ -2,8 +2,8 @@ package com.example.demo;
 
 import java.util.List;
 
-import com.example.demo.entity.User;
-import com.example.demo.mapper.UserMapper;
+import com.example.demopet.entity.User;
+import com.example.demopet.mapper.UserMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
