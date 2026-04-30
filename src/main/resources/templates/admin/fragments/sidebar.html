@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <!-- 侧边栏菜单片段 -->
+    <div th:fragment="sidebar(currentPath)">
+        <div class="sidebar-menu">
+            <div class="menu-category">主要菜单</div>
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link" th:classappend="${currentPath == '/admin/dashboard' ? 'active' : ''}" href="/admin/dashboard">
+                        <i class="bi bi-speedometer2"></i>
+                        <span>仪表板</span>
+                    </a>
+                </li>
+                <!-- 动态菜单 -->
+                <li class="nav-item" th:each="menu : ${menuList}">
+                    <a class="nav-link" 
+                       th:classappend="${currentPath == menu.path ? 'active' : ''}" 
+                       th:href="@{${menu.path}}">
+                        <i th:class="'bi ' + ${menu.icon}"></i>
+                        <span th:text="${menu.menuName}">菜单名称</span>
+                    </a>
+                </li>
+            </ul>
+            <div class="menu-category">其他</div>
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">
+                        <i class="bi bi-house-fill"></i>
+                        <span>返回首页</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
