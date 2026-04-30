@@ -33,11 +33,27 @@ public class MenuController {
     public String createForm(Model model) {
         model.addAttribute("menu", new Menu());
         model.addAttribute("action", "新增");
+        // 获取父菜单列表用于选择
+        model.addAttribute("parentMenus", menuService.getParentMenus());
         return "menu/form";
     }
     
     @PostMapping("/save")
     public String save(@ModelAttribute Menu menu) {
+        // 如果parentId为空或0，则设置为顶级菜单
+        if (menu.getParentId() == null) {
+            menu.setParentId(0L);
+        }
+        // 设置默认值
+        if (menu.getMenuType() == null) {
+            menu.setMenuType(2); // 默认为菜单类型
+        }
+        if (menu.getStatus() == null) {
+            menu.setStatus(1); // 默认启用
+        }
+        if (menu.getSort() == null) {
+            menu.setSort(0);
+        }
         menuService.saveOrUpdate(menu);
         return "redirect:/menu";
     }
@@ -47,6 +63,8 @@ public class MenuController {
         Menu menu = menuService.getById(id);
         model.addAttribute("menu", menu);
         model.addAttribute("action", "编辑");
+        // 获取父菜单列表用于选择（排除当前菜单及其子菜单）
+        model.addAttribute("parentMenus", menuService.getParentMenus());
         return "menu/form";
     }
     

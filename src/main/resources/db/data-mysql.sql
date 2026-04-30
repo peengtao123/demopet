@@ -24,25 +24,24 @@ INSERT INTO `role` (id, role_name, role_code, description, status) VALUES
 DELETE FROM `menu`;
 INSERT INTO `menu` (id, menu_name, menu_code, parent_id, path, component, sort, icon, menu_type, permission, status) VALUES
 -- 一级菜单（目录）
-(1, '系统管理', 'SYSTEM', 0, '/system', NULL, 1, '⚙️', 1, NULL, 1),
-(2, '商品管理', 'PRODUCT', 0, '/product', NULL, 2, '📦', 1, NULL, 1),
-(3, '订单管理', 'ORDER', 0, '/order', NULL, 3, '🛒', 1, NULL, 1),
-(4, '数据统计', 'STATISTICS', 0, '/statistics', NULL, 4, '📊', 1, NULL, 1),
+(1, '系统管理', 'SYSTEM', 0, NULL, NULL, 1, '⚙️', 1, NULL, 1),
+(2, '商品管理', 'PRODUCT', 0, NULL, NULL, 2, '📦', 1, NULL, 1),
+(3, '订单管理', 'ORDER', 0, NULL, NULL, 3, '🛒', 1, NULL, 1),
+(4, '数据统计', 'STATISTICS', 0, NULL, NULL, 4, '📊', 1, NULL, 1),
 
 -- 系统管理子菜单
-(10, '用户管理', 'USER_MANAGE', 1, '/admin/user', 'admin/user/index', 1, '👥', 2, 'system:user:list', 1),
-(11, '角色管理', 'ROLE_MANAGE', 1, '/admin/role', 'admin/role/index', 2, '🔐', 2, 'system:role:list', 1),
-(12, '菜单管理', 'MENU_MANAGE', 1, '/admin/menu', 'admin/menu/index', 3, '📋', 2, 'system:menu:list', 1),
+(10, '用户管理', 'USER_MANAGE', 1, '/user', 'admin/user/index', 1, '👥', 2, 'system:user:list', 1),
+(11, '角色管理', 'ROLE_MANAGE', 1, '/role', 'admin/role/index', 2, '🔐', 2, 'system:role:list', 1),
+(12, '菜单管理', 'MENU_MANAGE', 1, '/menu', 'admin/menu/index', 3, '📋', 2, 'system:menu:list', 1),
 
 -- 商品管理子菜单
-(20, '商品分类', 'CATEGORY_MANAGE', 2, '/admin/category', 'admin/category/index', 1, '📂', 2, 'product:category:list', 1),
-(21, '商品列表', 'PRODUCT_LIST', 2, '/admin/product', 'admin/product/index', 2, '📦', 2, 'product:list', 1),
+(20, '商品列表', 'PRODUCT_LIST', 2, '/product', 'admin/product/index', 1, '📦', 2, 'product:list', 1),
 
 -- 订单管理子菜单
-(30, '订单列表', 'ORDER_LIST', 3, '/admin/order', 'admin/order/index', 1, '📝', 2, 'order:list', 1),
+(30, '订单列表', 'ORDER_LIST', 3, '/order', 'admin/order/index', 1, '📝', 2, 'order:list', 1),
 
 -- 数据统计子菜单
-(40, '仪表板', 'DASHBOARD', 4, '/admin/dashboard', 'admin/dashboard', 1, '📊', 2, 'statistics:dashboard', 1);
+(40, '仪表板', 'DASHBOARD', 4, '/dashboard', 'admin/dashboard', 1, '📊', 2, 'statistics:dashboard', 1);
 
 -- 4. 初始化用户角色关联
 DELETE FROM `user_role`;
@@ -58,7 +57,7 @@ DELETE FROM `role_menu`;
 INSERT INTO `role_menu` (role_id, menu_id) VALUES
 (1, 1), (1, 2), (1, 3), (1, 4), -- 超级管理员所有一级菜单
 (1, 10), (1, 11), (1, 12), -- 系统管理子菜单
-(1, 20), (1, 21), -- 商品管理子菜单
+(1, 20), -- 商品管理子菜单
 (1, 30), -- 订单管理子菜单
 (1, 40), -- 数据统计子菜单
 
@@ -67,7 +66,7 @@ INSERT INTO `role_menu` (role_id, menu_id) VALUES
 (2, 10), (2, 11), (2, 12), (2, 40),
 
 -- 商品管理员权限
-(3, 2), (3, 20), (3, 21),
+(3, 2), (3, 20),
 
 -- 订单管理员权限
 (4, 3), (4, 30);

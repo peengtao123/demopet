@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>分配菜单权限 - 角色管理</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Microsoft YaHei', Arial, sans-serif; background-color: #f5f5f5; }
+        .wrapper { display: flex; min-height: 100vh; }
+        .sidebar { width: 240px; background: linear-gradient(180deg, #667eea 0%, #764ba2 100%); color: white; position: fixed; height: 100vh; overflow-y: auto; transition: all 0.3s; z-index: 1000; }
+        .sidebar.collapsed { width: 60px; }
+        .sidebar-header { padding: 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .sidebar-header h2 { font-size: 20px; font-weight: 600; }
+        .sidebar-menu { padding: 20px 0; }
+        .menu-item { padding: 12px 20px; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; text-decoration: none; color: white; }
+        .menu-item:hover { background: rgba(255,255,255,0.1); }
+        .menu-item.active { background: rgba(255,255,255,0.2); border-left: 3px solid white; }
+        .menu-item i { margin-right: 10px; width: 20px; text-align: center; }
+        .sidebar.collapsed .menu-item span { display: none; }
+        .submenu { padding-left: 20px; }
+        .submenu .menu-item { padding: 8px 20px; font-size: 14px; }
+        .menu-toggle { cursor: pointer; }
+        .arrow { margin-left: auto; transition: transform 0.3s; }
+        .arrow.rotate { transform: rotate(90deg); }
+        .sidebar-toggle { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(255,255,255,0.2); border: none; color: white; padding: 10px; border-radius: 5px; cursor: pointer; }
+        .main-wrapper { flex: 1; margin-left: 240px; transition: all 0.3s; }
+        .top-bar { background: white; padding: 15px 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
+        .top-bar h1 { font-size: 24px; color: #333; }
+        .user-info { display: flex; align-items: center; gap: 15px; }
+        .btn-logout { padding: 8px 16px; background: #667eea; color: white; border: none; border-radius: 5px; text-decoration: none; }
+        .content { padding: 30px; }
+        .card { background: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .card-header { font-size: 18px; font-weight: 600; margin-bottom: 15px; color: #333; border-bottom: 2px solid #667eea; padding-bottom: 10px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 500; color: #333; }
+        .menu-tree { max-height: 500px; overflow-y: auto; border: 1px solid #ddd; border-radius: 5px; padding: 10px; }
+        .menu-item-checkbox { padding: 8px; margin-bottom: 5px; border-radius: 5px; transition: background 0.3s; }
+        .menu-item-checkbox:hover { background: #f5f5f5; }
+        .menu-item-checkbox input[type="checkbox"] { margin-right: 10px; }
+        .menu-item-checkbox label { cursor: pointer; font-weight: normal; }
+        .menu-level-1 { padding-left: 10px; font-weight: 600; background: #f8f9fa; }
+        .menu-level-2 { padding-left: 40px; }
+        .menu-level-3 { padding-left: 70px; }
+        .menu-code { color: #999; font-size: 12px; margin-left: 10px; }
+        .menu-permission { color: #667eea; font-size: 11px; margin-left: 5px; }
+        .form-actions { display: flex; gap: 10px; margin-top: 20px; }
+        .btn { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 14px; text-decoration: none; display: inline-block; }
+        .btn-primary { background: #667eea; color: white; }
+        .btn-secondary { background: #6c757d; color: white; }
+        .btn:hover { opacity: 0.9; }
+        .role-info-display { background: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+        .role-info-display p { margin: 5px 0; color: #666; }
+        .role-info-display strong { color: #333; }
+        .select-all { margin-bottom: 10px; padding: 10px; background: #e9ecef; border-radius: 5px; }
+        .select-all label { cursor: pointer; font-weight: 600; }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2>电商后台</h2>
+            </div>
+            
+            <nav class="sidebar-menu">
+                <!-- 动态菜单 -->
+                <div th:each="menu : ${menuList}">
+                    <!-- 一级菜单 -->
+                    <div th:if="${menu.parentId == null or menu.parentId == 0}" class="menu-group">
+                        <!-- 如果有子菜单，显示为可展开的目录 -->
+                        <div th:if="${menu.menuType == 1}" class="menu-item menu-toggle" th:data-menu-id="${menu.id}">
+                            <i th:text="${menu.icon != null ? menu.icon : '📄'}">📄</i>
+                            <span th:text="${menu.menuName}">菜单名称</span>
+                            <span class="arrow">▶</span>
+                        </div>
+                        
+                        <!-- 如果没有子菜单，直接显示为链接 -->
+                        <a th:if="${menu.menuType == 2}" th:href="@{${menu.path}}" class="menu-item">
+                            <i th:text="${menu.icon != null ? menu.icon : '📄'}">📄</i>
+                            <span th:text="${menu.menuName}">菜单名称</span>
+                        </a>
+                        
+                        <!-- 子菜单容器 -->
+                        <div th:if="${menu.menuType == 1}" class="submenu" th:id="'submenu-' + ${menu.id}" style="display: none;">
+                            <a th:each="child : ${menuList}" 
+                               th:if="${child.parentId != null and child.parentId == menu.id and child.menuType == 2}"
+                               th:href="@{${child.path}}" 
+                               class="menu-item">
+                                <i th:text="${child.icon != null ? child.icon : '📄'}">📄</i>
+                                <span th:text="${child.menuName}">子菜单名称</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+            
+            <button class="sidebar-toggle" id="sidebarToggle">◀</button>
+        </aside>
+
+        <div class="main-wrapper" id="mainWrapper">
+            <div class="top-bar">
+                <h1>分配菜单权限</h1>
+                <div class="user-info">
+                    <span th:text="${session.currentUser != null ? session.currentUser.username : '管理员'}">管理员</span>
+                    <a th:href="@{/logout}" class="btn-logout">退出登录</a>
+                </div>
+            </div>
+
+            <div class="content">
+                <div class="card">
+                    <div class="card-header">为角色分配菜单权限</div>
+                    
+                    <div class="role-info-display">
+                        <p><strong>角色名称：</strong><span th:text="${role.roleName}">角色名称</span></p>
+                        <p><strong>角色编码：</strong><span th:text="${role.roleCode}">角色编码</span></p>
+                        <p><strong>描述：</strong><span th:text="${role.description}">描述</span></p>
+                    </div>
+                    
+                    <form th:action="@{/role/assign-menu/{id}(id=${role.id})}" method="post" id="menuForm">
+                        <div class="form-group">
+                            <div class="select-all">
+                                <input type="checkbox" id="selectAll">
+                                <label for="selectAll">全选/取消全选</label>
+                            </div>
+                            
+                            <label>选择菜单权限（可多选）</label>
+                            <div class="menu-tree">
+                                <!-- 只显示一级菜单（parentId为0或null） -->
+                                <div th:each="menu : ${allMenus}" th:if="${menu.parentId == null or menu.parentId == 0}">
+                                    <!-- 一级菜单 -->
+                                    <div class="menu-item-checkbox menu-level-1">
+                                        <input type="checkbox" 
+                                               th:id="'menu-' + ${menu.id}" 
+                                               name="menuIds" 
+                                               th:value="${menu.id}"
+                                               th:checked="${assignedMenuIds.contains(menu.id)}"
+                                               class="menu-checkbox">
+                                        <label th:for="'menu-' + ${menu.id}">
+                                            <span th:text="${menu.icon != null ? menu.icon : '📄'}">📄</span>
+                                            <span th:text="${menu.menuName}">菜单名称</span>
+                                            <span class="menu-code" th:text="'(' + ${menu.menuCode} + ')'">(CODE)</span>
+                                        </label>
+                                    </div>
+                                    
+                                    <!-- 二级菜单（查找 parentId 等于当前一级菜单 id 的菜单） -->
+                                    <div th:each="child : ${allMenus}" 
+                                         th:if="${child.parentId != null and child.parentId == menu.id}">
+                                        <div class="menu-item-checkbox menu-level-2">
+                                            <input type="checkbox" 
+                                                   th:id="'menu-' + ${child.id}" 
+                                                   name="menuIds" 
+                                                   th:value="${child.id}"
+                                                   th:checked="${assignedMenuIds.contains(child.id)}"
+                                                   class="menu-checkbox">
+                                            <label th:for="'menu-' + ${child.id}">
+                                                <span th:text="${child.icon != null ? child.icon : '📄'}">📄</span>
+                                                <span th:text="${child.menuName}">子菜单名称</span>
+                                                <span class="menu-code" th:text="'(' + ${child.menuCode} + ')'">(CODE)</span>
+                                                <span class="menu-permission" th:if="${child.permission != null}" th:text="'[' + ${child.permission} + ']'">[permission]</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">保存</button>
+                            <a th:href="@{/role}" class="btn btn-secondary">取消</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const sidebar = document.getElementById('sidebar');
+        const mainWrapper = document.getElementById('mainWrapper');
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        
+        // 侧边栏折叠功能
+        sidebarToggle.addEventListener('click', function() {
+            sidebar.classList.toggle('collapsed');
+            if (sidebar.classList.contains('collapsed')) {
+                mainWrapper.style.marginLeft = '60px';
+                sidebarToggle.textContent = '▶';
+            } else {
+                mainWrapper.style.marginLeft = '240px';
+                sidebarToggle.textContent = '◀';
+            }
+        });
+        
+        // 二级菜单展开/折叠功能
+        document.querySelectorAll('.menu-toggle').forEach(function(toggle) {
+            toggle.addEventListener('click', function() {
+                const menuId = this.getAttribute('data-menu-id');
+                const submenu = document.getElementById('submenu-' + menuId);
+                const arrow = this.querySelector('.arrow');
+                
+                if (submenu) {
+                    if (submenu.style.display === 'none') {
+                        submenu.style.display = 'block';
+                        arrow.classList.add('rotate');
+                    } else {
+                        submenu.style.display = 'none';
+                        arrow.classList.remove('rotate');
+                    }
+                }
+            });
+        });
+        
+        // 自动展开包含当前页面的菜单
+        const currentPath = window.location.pathname;
+        document.querySelectorAll('.submenu a').forEach(function(link) {
+            if (link.getAttribute('href') === currentPath) {
+                link.classList.add('active');
+                // 展开父级菜单
+                const submenu = link.closest('.submenu');
+                if (submenu) {
+                    submenu.style.display = 'block';
+                    const toggle = document.querySelector(`[data-menu-id="${submenu.id.replace('submenu-', '')}"]`);
+                    if (toggle) {
+                        const arrow = toggle.querySelector('.arrow');
+                        if (arrow) arrow.classList.add('rotate');
+                    }
+                }
+            }
+        });
+        
+        // 全选/取消全选功能
+        document.getElementById('selectAll').addEventListener('change', function() {
+            const checkboxes = document.querySelectorAll('.menu-checkbox');
+            checkboxes.forEach(function(checkbox) {
+                checkbox.checked = this.checked;
+            }.bind(this));
+        });
+        
+        // 当所有子菜单都被选中时，自动选中父菜单（可选功能）
+        document.querySelectorAll('.menu-checkbox').forEach(function(checkbox) {
+            checkbox.addEventListener('change', function() {
+                updateSelectAllState();
+            });
+        });
+        
+        function updateSelectAllState() {
+            const allCheckboxes = document.querySelectorAll('.menu-checkbox');
+            const selectAllCheckbox = document.getElementById('selectAll');
+            const checkedCount = document.querySelectorAll('.menu-checkbox:checked').length;
+            
+            if (checkedCount === 0) {
+                selectAllCheckbox.checked = false;
+                selectAllCheckbox.indeterminate = false;
+            } else if (checkedCount === allCheckboxes.length) {
+                selectAllCheckbox.checked = true;
+                selectAllCheckbox.indeterminate = false;
+            } else {
+                selectAllCheckbox.checked = false;
+                selectAllCheckbox.indeterminate = true;
+            }
+        }
+    </script>
+</body>
+</html>

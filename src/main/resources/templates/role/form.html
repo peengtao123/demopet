@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>角色管理员 - 电商后台管理员系统</title>
+    <title th:text="${action} + '角色 - 电商后台管理系统'">角色表单</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Microsoft YaHei', Arial, sans-serif; background-color: #f5f5f5; }
@@ -11,13 +11,11 @@
         .sidebar.collapsed { width: 60px; }
         .sidebar-header { padding: 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
         .sidebar-header h2 { font-size: 20px; font-weight: 600; }
-        .sidebar.collapsed .sidebar-header h2 { display: none; }
         .sidebar-menu { padding: 20px 0; }
         .menu-item { padding: 12px 20px; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; text-decoration: none; color: white; }
         .menu-item:hover { background: rgba(255,255,255,0.1); }
         .menu-item.active { background: rgba(255,255,255,0.2); border-left: 3px solid white; }
         .menu-item i { margin-right: 10px; width: 20px; text-align: center; }
-        .sidebar.collapsed .menu-item span { display: none; }
         .submenu { padding-left: 20px; }
         .submenu .menu-item { padding: 8px 20px; font-size: 14px; }
         .menu-toggle { cursor: pointer; }
@@ -25,7 +23,6 @@
         .arrow.rotate { transform: rotate(90deg); }
         .sidebar-toggle { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(255,255,255,0.2); border: none; color: white; padding: 10px; border-radius: 5px; cursor: pointer; }
         .main-wrapper { flex: 1; margin-left: 240px; transition: all 0.3s; }
-        .main-wrapper.expanded { margin-left: 60px; }
         .top-bar { background: white; padding: 15px 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
         .top-bar h1 { font-size: 24px; color: #333; }
         .user-info { display: flex; align-items: center; gap: 15px; }
@@ -33,15 +30,16 @@
         .content { padding: 30px; }
         .card { background: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 20px; }
         .card-header { font-size: 18px; font-weight: 600; margin-bottom: 15px; color: #333; border-bottom: 2px solid #667eea; padding-bottom: 10px; }
-        .search-box { display: flex; gap: 10px; margin-bottom: 20px; }
-        .search-box input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
-        .table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        .table th, .table td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
-        .table th { background: #f8f9fa; font-weight: 600; color: #333; }
-        .btn { padding: 8px 16px; border: none; border-radius: 5px; cursor: pointer; text-decoration: none; display: inline-block; font-size: 14px; }
-        .btn-primary { background: #667eea; color: white; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 500; color: #333; }
+        .form-group input, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px; }
+        .form-group textarea { min-height: 100px; resize: vertical; }
+        .form-row { display: flex; gap: 15px; }
+        .form-row .form-group { flex: 1; }
+        .btn { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; text-decoration: none; display: inline-block; font-size: 14px; }
+        .btn-secondary { background: #6c757d; color: white; }
         .btn-success { background: #28a745; color: white; }
-        .btn-danger { background: #dc3545; color: white; }
+        .form-actions { display: flex; gap: 10px; margin-top: 20px; }
     </style>
 </head>
 <body>
@@ -51,22 +49,16 @@
             <nav class="sidebar-menu">
                 <!-- 动态菜单 -->
                 <div th:each="menu : ${menuList}">
-                    <!-- 一级菜单 -->
                     <div th:if="${menu.parentId == null or menu.parentId == 0}" class="menu-group">
-                        <!-- 如果有子菜单，显示为可展开的目录 -->
                         <div th:if="${menu.menuType == 1}" class="menu-item menu-toggle" th:data-menu-id="${menu.id}">
                             <i th:text="${menu.icon != null ? menu.icon : '📄'}">📄</i>
                             <span th:text="${menu.menuName}">菜单名称</span>
                             <span class="arrow">▶</span>
                         </div>
-                        
-                        <!-- 如果没有子菜单，直接显示为链接 -->
                         <a th:if="${menu.menuType == 2}" th:href="@{${menu.path}}" class="menu-item">
                             <i th:text="${menu.icon != null ? menu.icon : '📄'}">📄</i>
                             <span th:text="${menu.menuName}">菜单名称</span>
                         </a>
-                        
-                        <!-- 子菜单容器 -->
                         <div th:if="${menu.menuType == 1}" class="submenu" th:id="'submenu-' + ${menu.id}" style="display: none;">
                             <a th:each="child : ${menuList}" 
                                th:if="${child.parentId != null and child.parentId == menu.id and child.menuType == 2}"
@@ -84,42 +76,40 @@
 
         <div class="main-wrapper" id="mainWrapper">
             <div class="top-bar">
-                <h1>角色管理员</h1>
+                <h1 th:text="${action} + '角色'">角色表单</h1>
                 <div class="user-info">
                     <span th:text="${session.currentUser != null ? session.currentUser.username : '管理员'}">管理员</span>
-                    <a th:href="@{/logout}" class="btn-logout">退出登录录</a>
+                    <a th:href="@{/logout}" class="btn-logout">退出登录</a>
                 </div>
             </div>
 
             <div class="content">
                 <div class="card">
-                    <div class="card-header">角色列表</div>
-                    <div class="search-box">
-                        <form th:action="@{/role}" method="get" style="display: flex; gap: 10px; flex: 1;">
-                            <input type="text" name="keyword" th:value="${keyword}" placeholder="搜索角色名称或编码...">
-                            <button type="submit" class="btn btn-primary">搜索</button>
-                        </form>
-                        <a th:href="@{/role/create}" class="btn btn-success">添加角色</a>
-                    </div>
+                    <div class="card-header" th:text="${action} + '角色'">角色表单</div>
+                    
+                    <form th:action="@{/role/save}" method="post" th:object="${role}">
+                        <input type="hidden" th:field="*{id}" />
+                        
+                        <div class="form-group">
+                            <label for="roleName">角色名称 *</label>
+                            <input type="text" id="roleName" th:field="*{roleName}" required placeholder="请输入角色名称">
+                        </div>
 
-                    <table class="table">
-                        <thead>
-                            <tr><th>ID</th><th>角色名称</th><th>角色编码</th><th>描述</th><th>操作</th></tr>
-                        </thead>
-                        <tbody>
-                            <tr th:each="role : ${roles}">
-                                <td th:text="${role.id}">1</td>
-                                <td th:text="${role.roleName}">超级管理员</td>
-                                <td th:text="${role.roleCode}">SUPER_ADMIN</td>
-                                <td th:text="${role.description}">拥有所有权限</td>
-                                <td>
-                                    <a th:href="@{/role/edit/{id}(id=${role.id})}" class="btn btn-primary" style="padding: 5px 10px; font-size: 12px;">编辑</a>
-                                    <a th:href="@{/role/assign-menu/{id}(id=${role.id})}" class="btn btn-success" style="padding: 5px 10px; font-size: 12px; margin-left: 5px;">分配菜单权限</a>
-                                    <a th:href="@{/role/delete/{id}(id=${role.id})}" class="btn btn-danger" style="padding: 5px 10px; font-size: 12px; margin-left: 5px;" onclick="return confirm('确定要删除吗？')">删除</a>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                        <div class="form-group">
+                            <label for="roleCode">角色编码 *</label>
+                            <input type="text" id="roleCode" th:field="*{roleCode}" required placeholder="请输入角色编码（如：ADMIN）">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="description">角色描述</label>
+                            <textarea id="description" th:field="*{description}" placeholder="请输入角色描述"></textarea>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-success">保存</button>
+                            <a th:href="@{/role}" class="btn btn-secondary">取消</a>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -130,7 +120,6 @@
         const mainWrapper = document.getElementById('mainWrapper');
         const sidebarToggle = document.getElementById('sidebarToggle');
         
-        // 侧边栏折叠功能
         sidebarToggle.addEventListener('click', function() {
             sidebar.classList.toggle('collapsed');
             mainWrapper.classList.toggle('expanded');
@@ -141,7 +130,6 @@
             }
         });
         
-        // 二级菜单展开/折叠功能
         document.querySelectorAll('.menu-toggle').forEach(function(toggle) {
             toggle.addEventListener('click', function() {
                 const menuId = this.getAttribute('data-menu-id');
@@ -160,12 +148,10 @@
             });
         });
         
-        // 自动展开包含当前页面的菜单
         const currentPath = window.location.pathname;
         document.querySelectorAll('.submenu a').forEach(function(link) {
             if (link.getAttribute('href') === currentPath) {
                 link.classList.add('active');
-                // 展开父级菜单
                 const submenu = link.closest('.submenu');
                 if (submenu) {
                     submenu.style.display = 'block';

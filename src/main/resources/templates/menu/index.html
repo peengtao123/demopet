@@ -16,6 +16,11 @@
         .menu-item:hover { background: rgba(255,255,255,0.1); }
         .menu-item.active { background: rgba(255,255,255,0.2); border-left: 3px solid white; }
         .menu-item i { margin-right: 10px; width: 20px; text-align: center; }
+        .submenu { padding-left: 20px; }
+        .submenu .menu-item { padding: 8px 20px; font-size: 14px; }
+        .menu-toggle { cursor: pointer; }
+        .arrow { margin-left: auto; transition: transform 0.3s; }
+        .arrow.rotate { transform: rotate(90deg); }
         .sidebar-toggle { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(255,255,255,0.2); border: none; color: white; padding: 10px; border-radius: 5px; cursor: pointer; }
         .main-wrapper { flex: 1; margin-left: 240px; transition: all 0.3s; }
         .top-bar { background: white; padding: 15px 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
@@ -41,12 +46,35 @@
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header"><h2>电商后台</h2></div>
             <nav class="sidebar-menu">
-                <a th:href="@{/dashboard}" class="menu-item"><i>📊</i><span>仪表板</span></a>
-                <a th:href="@{/user}" class="menu-item"><i>👥</i><span>用户管理员</span></a>
-                <a th:href="@{/role}" class="menu-item"><i>🔐</i><span>角色管理员</span></a>
-                <a th:href="@{/menu}" class="menu-item active"><i>📋</i><span>菜单管理员</span></a>
-                <a th:href="@{/product}" class="menu-item"><i>📦</i><span>商品管理员</span></a>
-                <a th:href="@{/order}" class="menu-item"><i>🛒</i><span>订单管理员</span></a>
+                <!-- 动态菜单 -->
+                <div th:each="menu : ${menuList}">
+                    <!-- 一级菜单 -->
+                    <div th:if="${menu.parentId == null or menu.parentId == 0}" class="menu-group">
+                        <!-- 如果有子菜单，显示为可展开的目录 -->
+                        <div th:if="${menu.menuType == 1}" class="menu-item menu-toggle" th:data-menu-id="${menu.id}">
+                            <i th:text="${menu.icon != null ? menu.icon : '📄'}">📄</i>
+                            <span th:text="${menu.menuName}">菜单名称</span>
+                            <span class="arrow">▶</span>
+                        </div>
+                        
+                        <!-- 如果没有子菜单，直接显示为链接 -->
+                        <a th:if="${menu.menuType == 2}" th:href="@{${menu.path}}" class="menu-item">
+                            <i th:text="${menu.icon != null ? menu.icon : '📄'}">📄</i>
+                            <span th:text="${menu.menuName}">菜单名称</span>
+                        </a>
+                        
+                        <!-- 子菜单容器 -->
+                        <div th:if="${menu.menuType == 1}" class="submenu" th:id="'submenu-' + ${menu.id}" style="display: none;">
+                            <a th:each="child : ${menuList}" 
+                               th:if="${child.parentId != null and child.parentId == menu.id and child.menuType == 2}"
+                               th:href="@{${child.path}}" 
+                               class="menu-item">
+                                <i th:text="${child.icon != null ? child.icon : '📄'}">📄</i>
+                                <span th:text="${child.menuName}">子菜单名称</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
             </nav>
             <button class="sidebar-toggle" id="sidebarToggle">◀</button>
         </aside>
@@ -73,15 +101,31 @@
 
                     <table class="table">
                         <thead>
-                            <tr><th>ID</th><th>菜单名称</th><th>菜单编码</th><th>路径</th><th>排序</th><th>操作</th></tr>
+                            <tr><th>ID</th><th>菜单名称</th><th>菜单编码</th><th>父级菜单</th><th>类型</th><th>路径</th><th>排序</th><th>状态</th><th>操作</th></tr>
                         </thead>
                         <tbody>
                             <tr th:each="menu : ${menus}">
                                 <td th:text="${menu.id}">1</td>
-                                <td th:text="${menu.menuName}">系统管理员</td>
+                                <td>
+                                    <span th:if="${menu.parentId != null and menu.parentId != 0}" style="margin-left: 20px;">└─ </span>
+                                    <span th:text="${menu.menuName}">系统管理员</span>
+                                </td>
                                 <td th:text="${menu.menuCode}">SYSTEM</td>
+                                <td>
+                                    <span th:if="${menu.parentId == null or menu.parentId == 0}">顶级菜单</span>
+                                    <span th:unless="${menu.parentId == null or menu.parentId == 0}" th:text="'ID:' + ${menu.parentId}">父菜单ID</span>
+                                </td>
+                                <td>
+                                    <span th:if="${menu.menuType == 1}">目录</span>
+                                    <span th:if="${menu.menuType == 2}">菜单</span>
+                                    <span th:if="${menu.menuType == 3}">按钮</span>
+                                </td>
                                 <td th:text="${menu.path}">/system</td>
                                 <td th:text="${menu.sort}">1</td>
+                                <td>
+                                    <span th:if="${menu.status == 1}" style="color: green;">启用</span>
+                                    <span th:if="${menu.status == 0}" style="color: red;">禁用</span>
+                                </td>
                                 <td>
                                     <a th:href="@{/menu/edit/{id}(id=${menu.id})}" class="btn btn-primary" style="padding: 5px 10px; font-size: 12px;">编辑</a>
                                     <a th:href="@{/menu/delete/{id}(id=${menu.id})}" class="btn btn-danger" style="padding: 5px 10px; font-size: 12px;" onclick="return confirm('确定要删除吗？')">删除</a>
@@ -98,6 +142,8 @@
         const sidebar = document.getElementById('sidebar');
         const mainWrapper = document.getElementById('mainWrapper');
         const sidebarToggle = document.getElementById('sidebarToggle');
+        
+        // 侧边栏折叠功能
         sidebarToggle.addEventListener('click', function() {
             sidebar.classList.toggle('collapsed');
             mainWrapper.classList.toggle('expanded');
@@ -105,6 +151,43 @@
                 sidebarToggle.textContent = '▶';
             } else {
                 sidebarToggle.textContent = '◀';
+            }
+        });
+        
+        // 二级菜单展开/折叠功能
+        document.querySelectorAll('.menu-toggle').forEach(function(toggle) {
+            toggle.addEventListener('click', function() {
+                const menuId = this.getAttribute('data-menu-id');
+                const submenu = document.getElementById('submenu-' + menuId);
+                const arrow = this.querySelector('.arrow');
+                
+                if (submenu) {
+                    if (submenu.style.display === 'none') {
+                        submenu.style.display = 'block';
+                        arrow.classList.add('rotate');
+                    } else {
+                        submenu.style.display = 'none';
+                        arrow.classList.remove('rotate');
+                    }
+                }
+            });
+        });
+        
+        // 自动展开包含当前页面的菜单
+        const currentPath = window.location.pathname;
+        document.querySelectorAll('.submenu a').forEach(function(link) {
+            if (link.getAttribute('href') === currentPath) {
+                link.classList.add('active');
+                // 展开父级菜单
+                const submenu = link.closest('.submenu');
+                if (submenu) {
+                    submenu.style.display = 'block';
+                    const toggle = document.querySelector(`[data-menu-id="${submenu.id.replace('submenu-', '')}"]`);
+                    if (toggle) {
+                        const arrow = toggle.querySelector('.arrow');
+                        if (arrow) arrow.classList.add('rotate');
+                    }
+                }
             }
         });
     </script>

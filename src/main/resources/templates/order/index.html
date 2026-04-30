@@ -15,6 +15,11 @@
         .menu-item:hover { background: rgba(255,255,255,0.1); }
         .menu-item.active { background: rgba(255,255,255,0.2); border-left: 3px solid white; }
         .menu-item i { margin-right: 10px; }
+        .submenu { padding-left: 20px; }
+        .submenu .menu-item { padding: 8px 20px; font-size: 14px; }
+        .menu-toggle { cursor: pointer; }
+        .arrow { margin-left: auto; transition: transform 0.3s; }
+        .arrow.rotate { transform: rotate(90deg); }
         .main-wrapper { flex: 1; margin-left: 240px; }
         .top-bar { background: white; padding: 15px 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
         .top-bar h1 { font-size: 24px; color: #333; }
@@ -36,12 +41,35 @@
         <aside class="sidebar">
             <div class="sidebar-header"><h2>电商后台</h2></div>
             <nav class="sidebar-menu">
-                <a th:href="@{/dashboard}" class="menu-item"><i>📊</i>仪表板</a>
-                <a th:href="@{/user}" class="menu-item"><i>👥</i>用户管理员</a>
-                <a th:href="@{/role}" class="menu-item"><i>🔐</i>角色管理员</a>
-                <a th:href="@{/menu}" class="menu-item"><i>📋</i>菜单管理员</a>
-                <a th:href="@{/product}" class="menu-item"><i>📦</i>商品管理员</a>
-                <a th:href="@{/order}" class="menu-item active"><i>🛒</i>订单管理员</a>
+                <!-- 动态菜单 -->
+                <div th:each="menu : ${menuList}">
+                    <!-- 一级菜单 -->
+                    <div th:if="${menu.parentId == null or menu.parentId == 0}" class="menu-group">
+                        <!-- 如果有子菜单，显示为可展开的目录 -->
+                        <div th:if="${menu.menuType == 1}" class="menu-item menu-toggle" th:data-menu-id="${menu.id}">
+                            <i th:text="${menu.icon != null ? menu.icon : '📄'}">📄</i>
+                            <span th:text="${menu.menuName}">菜单名称</span>
+                            <span class="arrow">▶</span>
+                        </div>
+                        
+                        <!-- 如果没有子菜单，直接显示为链接 -->
+                        <a th:if="${menu.menuType == 2}" th:href="@{${menu.path}}" class="menu-item">
+                            <i th:text="${menu.icon != null ? menu.icon : '📄'}">📄</i>
+                            <span th:text="${menu.menuName}">菜单名称</span>
+                        </a>
+                        
+                        <!-- 子菜单容器 -->
+                        <div th:if="${menu.menuType == 1}" class="submenu" th:id="'submenu-' + ${menu.id}" style="display: none;">
+                            <a th:each="child : ${menuList}" 
+                               th:if="${child.parentId != null and child.parentId == menu.id and child.menuType == 2}"
+                               th:href="@{${child.path}}" 
+                               class="menu-item">
+                                <i th:text="${child.icon != null ? child.icon : '📄'}">📄</i>
+                                <span th:text="${child.menuName}">子菜单名称</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
             </nav>
         </aside>
 
@@ -86,5 +114,44 @@
             </div>
         </div>
     </div>
+
+    <script>
+        // 二级菜单展开/折叠功能
+        document.querySelectorAll('.menu-toggle').forEach(function(toggle) {
+            toggle.addEventListener('click', function() {
+                const menuId = this.getAttribute('data-menu-id');
+                const submenu = document.getElementById('submenu-' + menuId);
+                const arrow = this.querySelector('.arrow');
+                
+                if (submenu) {
+                    if (submenu.style.display === 'none') {
+                        submenu.style.display = 'block';
+                        arrow.classList.add('rotate');
+                    } else {
+                        submenu.style.display = 'none';
+                        arrow.classList.remove('rotate');
+                    }
+                }
+            });
+        });
+        
+        // 自动展开包含当前页面的菜单
+        const currentPath = window.location.pathname;
+        document.querySelectorAll('.submenu a').forEach(function(link) {
+            if (link.getAttribute('href') === currentPath) {
+                link.classList.add('active');
+                // 展开父级菜单
+                const submenu = link.closest('.submenu');
+                if (submenu) {
+                    submenu.style.display = 'block';
+                    const toggle = document.querySelector(`[data-menu-id="${submenu.id.replace('submenu-', '')}"]`);
+                    if (toggle) {
+                        const arrow = toggle.querySelector('.arrow');
+                        if (arrow) arrow.classList.add('rotate');
+                    }
+                }
+            }
+        });
+    </script>
 </body>
 </html>

@@ -18,6 +18,11 @@
         .menu-item.active { background: rgba(255,255,255,0.2); border-left: 3px solid white; }
         .menu-item i { margin-right: 10px; width: 20px; text-align: center; }
         .sidebar.collapsed .menu-item span { display: none; }
+        .submenu { padding-left: 20px; }
+        .submenu .menu-item { padding: 8px 20px; font-size: 14px; }
+        .menu-toggle { cursor: pointer; }
+        .arrow { margin-left: auto; transition: transform 0.3s; }
+        .arrow.rotate { transform: rotate(90deg); }
         .sidebar-toggle { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(255,255,255,0.2); border: none; color: white; padding: 10px; border-radius: 5px; cursor: pointer; }
         .main-wrapper { flex: 1; margin-left: 240px; transition: all 0.3s; }
         .main-wrapper.expanded { margin-left: 60px; }
@@ -46,12 +51,35 @@
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header"><h2>电商后台</h2></div>
             <nav class="sidebar-menu">
-                <a th:href="@{/dashboard}" class="menu-item active"><i>📊</i><span>仪表板</span></a>
-                <a th:href="@{/user}" class="menu-item"><i>👥</i><span>用户管理</span></a>
-                <a th:href="@{/role}" class="menu-item"><i>🔐</i><span>角色管理</span></a>
-                <a th:href="@{/menu}" class="menu-item"><i>📋</i><span>菜单管理</span></a>
-                <a th:href="@{/product}" class="menu-item"><i>📦</i><span>商品管理</span></a>
-                <a th:href="@{/order}" class="menu-item"><i>🛒</i><span>订单管理</span></a>
+                <!-- 动态菜单 -->
+                <div th:each="menu : ${menuList}">
+                    <!-- 一级菜单 -->
+                    <div th:if="${menu.parentId == null or menu.parentId == 0}" class="menu-group">
+                        <!-- 如果有子菜单，显示为可展开的目录 -->
+                        <div th:if="${menu.menuType == 1}" class="menu-item menu-toggle" th:data-menu-id="${menu.id}">
+                            <i th:text="${menu.icon != null ? menu.icon : '📄'}">📄</i>
+                            <span th:text="${menu.menuName}">菜单名称</span>
+                            <span class="arrow">▶</span>
+                        </div>
+                        
+                        <!-- 如果没有子菜单，直接显示为链接 -->
+                        <a th:if="${menu.menuType == 2}" th:href="@{${menu.path}}" class="menu-item">
+                            <i th:text="${menu.icon != null ? menu.icon : '📄'}">📄</i>
+                            <span th:text="${menu.menuName}">菜单名称</span>
+                        </a>
+                        
+                        <!-- 子菜单容器 -->
+                        <div th:if="${menu.menuType == 1}" class="submenu" th:id="'submenu-' + ${menu.id}" style="display: none;">
+                            <a th:each="child : ${menuList}" 
+                               th:if="${child.parentId != null and child.parentId == menu.id and child.menuType == 2}"
+                               th:href="@{${child.path}}" 
+                               class="menu-item">
+                                <i th:text="${child.icon != null ? child.icon : '📄'}">📄</i>
+                                <span th:text="${child.menuName}">子菜单名称</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
             </nav>
             <button class="sidebar-toggle" id="sidebarToggle">◀</button>
         </aside>
@@ -115,6 +143,8 @@
         const sidebar = document.getElementById('sidebar');
         const mainWrapper = document.getElementById('mainWrapper');
         const sidebarToggle = document.getElementById('sidebarToggle');
+        
+        // 侧边栏折叠功能
         sidebarToggle.addEventListener('click', function() {
             sidebar.classList.toggle('collapsed');
             mainWrapper.classList.toggle('expanded');
@@ -122,6 +152,43 @@
                 sidebarToggle.textContent = '▶';
             } else {
                 sidebarToggle.textContent = '◀';
+            }
+        });
+        
+        // 二级菜单展开/折叠功能
+        document.querySelectorAll('.menu-toggle').forEach(function(toggle) {
+            toggle.addEventListener('click', function() {
+                const menuId = this.getAttribute('data-menu-id');
+                const submenu = document.getElementById('submenu-' + menuId);
+                const arrow = this.querySelector('.arrow');
+                
+                if (submenu) {
+                    if (submenu.style.display === 'none') {
+                        submenu.style.display = 'block';
+                        arrow.classList.add('rotate');
+                    } else {
+                        submenu.style.display = 'none';
+                        arrow.classList.remove('rotate');
+                    }
+                }
+            });
+        });
+        
+        // 自动展开包含当前页面的菜单
+        const currentPath = window.location.pathname;
+        document.querySelectorAll('.submenu a').forEach(function(link) {
+            if (link.getAttribute('href') === currentPath) {
+                link.classList.add('active');
+                // 展开父级菜单
+                const submenu = link.closest('.submenu');
+                if (submenu) {
+                    submenu.style.display = 'block';
+                    const toggle = document.querySelector(`[data-menu-id="${submenu.id.replace('submenu-', '')}"]`);
+                    if (toggle) {
+                        const arrow = toggle.querySelector('.arrow');
+                        if (arrow) arrow.classList.add('rotate');
+                    }
+                }
             }
         });
     </script>

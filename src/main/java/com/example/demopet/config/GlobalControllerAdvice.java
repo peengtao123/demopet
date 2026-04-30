@@ -23,6 +23,6 @@ public class GlobalControllerAdvice {
      */
     @ModelAttribute("menuList")
     public List<Menu> addMenuList(Model model) {
-        return menuService.list();
+        return menuService.listWithSort();
     }
 }

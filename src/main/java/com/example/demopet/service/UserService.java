@@ -33,4 +33,20 @@ public class UserService extends ServiceImpl<UserMapper, User> {
                .eq(User::getPassword, password);
         return this.getOne(wrapper);
     }
+    
+    /**
+     * 检查用户名是否已存在
+     * @param username 要检查的用户名
+     * @param excludeId 排除的用户ID（用于编辑时排除当前用户）
+     * @return true-用户名已存在，false-用户名可用
+     */
+    @Transactional(readOnly = true)
+    public boolean isUsernameExists(String username, Long excludeId) {
+        LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(User::getUsername, username);
+        if (excludeId != null) {
+            wrapper.ne(User::getId, excludeId);
+        }
+        return this.count(wrapper) > 0;
+    }
 }
