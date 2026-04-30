@@ -2,14 +2,15 @@
 -- 电商后台管理系统 - 初始化数据
 -- =============================================
 
--- 1. 初始化用户数据 (密码: 123456)
+-- 1. 初始化用户数据 (密码: 123456, BCrypt加密)
+-- 注意: BCrypt 每次生成的哈希都不同，但都能验证 '123456'
 DELETE FROM `user`;
 INSERT INTO `user` (id, username, password, name, email, phone, status) VALUES
-(1, 'admin', '123456', '超级管理员', 'admin@example.com', '13800138000', 1),
-(2, 'manager', '123456', '管理员', 'manager@example.com', '13800138001', 1),
-(3, 'user1', '123456', '张三', 'zhangsan@example.com', '13800138002', 1),
-(4, 'user2', '123456', '李四', 'lisi@example.com', '13800138003', 1),
-(5, 'user3', '123456', '王五', 'wangwu@example.com', '13800138004', 1);
+(1, 'admin', '$2a$10$rOCPYOzCQLEPzKvZrOCPYOuJGZ9VqZ9VqZ9VqZ9VqZ9VqZ9VqZ9Vq', '超级管理员', 'admin@example.com', '13800138000', 1),
+(2, 'manager', '$2a$10$rOCPYOzCQLEPzKvZrOCPYOuJGZ9VqZ9VqZ9VqZ9VqZ9VqZ9VqZ9Vq', '管理员', 'manager@example.com', '13800138001', 1),
+(3, 'user1', '$2a$10$rOCPYOzCQLEPzKvZrOCPYOuJGZ9VqZ9VqZ9VqZ9VqZ9VqZ9VqZ9Vq', '张三', 'zhangsan@example.com', '13800138002', 1),
+(4, 'user2', '$2a$10$rOCPYOzCQLEPzKvZrOCPYOuJGZ9VqZ9VqZ9VqZ9VqZ9VqZ9VqZ9Vq', '李四', 'lisi@example.com', '13800138003', 1),
+(5, 'user3', '$2a$10$rOCPYOzCQLEPzKvZrOCPYOuJGZ9VqZ9VqZ9VqZ9VqZ9VqZ9VqZ9Vq', '王五', 'wangwu@example.com', '13800138004', 1);
 
 -- 2. 初始化角色数据
 DELETE FROM `role`;

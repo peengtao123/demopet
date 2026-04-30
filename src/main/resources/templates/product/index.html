@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
@@ -78,7 +78,7 @@
         <div class="main-wrapper">
             <div class="top-bar">
                 <h1>商品管理员</h1>
-                <div><span th:text="${session.currentUser != null ? session.currentUser.username : '管理员'}">管理员</span>
+                <div><span th:text="${currentUser != null ? currentUser.username : '管理员'}">管理员</span>
                     <a th:href="@{/logout}" class="btn-logout" style="margin-left: 15px;">退出登录</a>
                 </div>
             </div>
