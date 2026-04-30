@@ -10,3 +10,9 @@ spring:
       schema-locations: classpath:db/schema-mysql.sql
       data-locations: classpath:db/data-mysql.sql
       mode: always
+  thymeleaf:
+    cache: false
+    prefix: classpath:/templates/
+    suffix: .html
+    encoding: UTF-8
+    mode: HTML
