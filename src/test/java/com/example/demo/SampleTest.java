@@ -2,6 +2,7 @@ package com.example.demo;
 
 import java.util.List;
 
+import com.example.demopet.DemopetApplication;
 import com.example.demopet.entity.User;
 import com.example.demopet.mapper.UserMapper;
 import org.junit.jupiter.api.Test;
@@ -10,7 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import com.baomidou.mybatisplus.core.toolkit.Assert;
 
-@SpringBootTest
+@SpringBootTest(classes = DemopetApplication.class)
 public class SampleTest {
 
     @Autowired

@@ -130,6 +130,11 @@
 					<charset>UTF-8</charset>
 					<docencoding>UTF-8</docencoding>
 					<show>private</show>
+					<source>17</source>
+					<additionalJOptions>
+						<additionalJOption>-J-Dfile.encoding=UTF-8</additionalJOption>
+						<additionalJOption>-Xdoclint:none</additionalJOption>
+					</additionalJOptions>
 					<links>
 						<link>https://docs.oracle.com/en/java/javase/17/docs/api/</link>
 						<link>https://docs.spring.io/spring-framework/docs/current/javadoc-api/</link>
@@ -177,7 +182,8 @@
 				</reportSets>
 			</plugin>
 			
-			<!-- JavaDoc 报告 -->
+			<!-- JavaDoc 报告 - 暂时禁用以避免中文路径问题 -->
+			<!--
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
@@ -187,8 +193,23 @@
 					<charset>UTF-8</charset>
 					<docencoding>UTF-8</docencoding>
 					<show>private</show>
+					<source>17</source>
+					<failOnError>false</failOnError>
+					<additionalJOptions>
+						<additionalJOption>-J-Dfile.encoding=UTF-8</additionalJOption>
+						<additionalJOption>-Xdoclint:none</additionalJOption>
+					</additionalJOptions>
 				</configuration>
+				<reportSets>
+					<reportSet>
+						<id>default</id>
+						<reports>
+							<report>javadoc</report>
+						</reports>
+					</reportSet>
+				</reportSets>
 			</plugin>
+			-->
 			
 			<!-- 源码交叉引用报告 -->
 			<plugin>
