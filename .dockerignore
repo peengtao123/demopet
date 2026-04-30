@@ -1,0 +1,30 @@
+# Git 文件
+.git
+.gitignore
+
+# IDE 文件
+.idea
+.vscode
+*.iml
+
+# Maven 构建输出
+target/
+!.mvn/wrapper/maven-wrapper.jar
+
+# 日志文件
+*.log
+
+# 操作系统文件
+.DS_Store
+Thumbs.db
+
+# Docker 相关文件
+docker-compose.yml
+Dockerfile
+
+# 文档文件
+doc/
+README.md
+
+# 测试文件
+test/
