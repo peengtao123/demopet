@@ -29,7 +29,7 @@ public class LoginController {
         User user = userService.login(username, password);
         if (user != null) {
             session.setAttribute("currentUser", user);
-            return "redirect:/admin/dashboard";
+            return "redirect:/dashboard";
         } else {
             model.addAttribute("error", "用户名或密码错误");
             return "login";

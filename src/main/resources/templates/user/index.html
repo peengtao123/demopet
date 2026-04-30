@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>用户管理 - 电商后台管理系统</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Microsoft YaHei', Arial, sans-serif; background-color: #f5f5f5; }
+        .wrapper { display: flex; min-height: 100vh; }
+        .sidebar { width: 240px; background: linear-gradient(180deg, #667eea 0%, #764ba2 100%); color: white; position: fixed; height: 100vh; overflow-y: auto; transition: all 0.3s; z-index: 1000; }
+        .sidebar.collapsed { width: 60px; }
+        .sidebar-header { padding: 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .sidebar-header h2 { font-size: 20px; font-weight: 600; }
+        .sidebar.collapsed .sidebar-header h2 { display: none; }
+        .sidebar-menu { padding: 20px 0; }
+        .menu-item { padding: 12px 20px; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; text-decoration: none; color: white; }
+        .menu-item:hover { background: rgba(255,255,255,0.1); }
+        .menu-item.active { background: rgba(255,255,255,0.2); border-left: 3px solid white; }
+        .menu-item i { margin-right: 10px; width: 20px; text-align: center; }
+        .sidebar.collapsed .menu-item span { display: none; }
+        .sidebar-toggle { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(255,255,255,0.2); border: none; color: white; padding: 10px; border-radius: 5px; cursor: pointer; }
+        .main-wrapper { flex: 1; margin-left: 240px; transition: all 0.3s; }
+        .main-wrapper.expanded { margin-left: 60px; }
+        .top-bar { background: white; padding: 15px 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
+        .top-bar h1 { font-size: 24px; color: #333; }
+        .user-info { display: flex; align-items: center; gap: 15px; }
+        .btn-logout { padding: 8px 16px; background: #667eea; color: white; border: none; border-radius: 5px; text-decoration: none; }
+        .content { padding: 30px; }
+        .card { background: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .card-header { font-size: 18px; font-weight: 600; margin-bottom: 15px; color: #333; border-bottom: 2px solid #667eea; padding-bottom: 10px; }
+        .search-box { display: flex; gap: 10px; margin-bottom: 20px; }
+        .search-box input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
+        .table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        .table th, .table td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
+        .table th { background: #f8f9fa; font-weight: 600; color: #333; }
+        .table tr:hover { background: #f8f9fa; }
+        .btn { padding: 8px 16px; border: none; border-radius: 5px; cursor: pointer; text-decoration: none; display: inline-block; font-size: 14px; }
+        .btn-primary { background: #667eea; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-danger { background: #dc3545; color: white; }
+        .pagination { display: flex; justify-content: center; gap: 10px; margin-top: 20px; }
+        .pagination a { padding: 8px 12px; border: 1px solid #ddd; border-radius: 5px; text-decoration: none; color: #667eea; }
+        .pagination a:hover { background: #667eea; color: white; }
+        .pagination .active { background: #667eea; color: white; border-color: #667eea; }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header"><h2>电商后台</h2></div>
+            <nav class="sidebar-menu">
+                <a th:href="@{/dashboard}" class="menu-item"><i>📊</i><span>仪表板</span></a>
+                <a th:href="@{/user}" class="menu-item active"><i>👥</i><span>用户管理</span></a>
+                <a th:href="@{/role}" class="menu-item"><i>🔐</i><span>角色管理</span></a>
+                <a th:href="@{/menu}" class="menu-item"><i>📋</i><span>菜单管理</span></a>
+                <a th:href="@{/product}" class="menu-item"><i>📦</i><span>商品管理</span></a>
+                <a th:href="@{/order}" class="menu-item"><i>🛒</i><span>订单管理</span></a>
+            </nav>
+            <button class="sidebar-toggle" id="sidebarToggle">◀</button>
+        </aside>
+
+        <div class="main-wrapper" id="mainWrapper">
+            <div class="top-bar">
+                <h1>用户管理</h1>
+                <div class="user-info">
+                    <span th:text="${session.currentUser != null ? session.currentUser.username : '管理员'}">管理员</span>
+                    <a th:href="@{/logout}" class="btn-logout">退出登录</a>
+                </div>
+            </div>
+
+            <div class="content">
+                <div class="card">
+                    <div class="card-header">用户列表</div>
+                    
+                    <div class="search-box">
+                        <form th:action="@{/user}" method="get" style="display: flex; gap: 10px; flex: 1;">
+                            <input type="text" name="keyword" th:value="${keyword}" placeholder="搜索用户名、姓名或邮箱...">
+                            <button type="submit" class="btn btn-primary">搜索</button>
+                        </form>
+                        <a th:href="@{/user/form}" class="btn btn-success">添加用户</a>
+                    </div>
+
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>用户名</th>
+                                <th>姓名</th>
+                                <th>邮箱</th>
+                                <th>手机号</th>
+                                <th>状态</th>
+                                <th>创建时间</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="user : ${page.records}">
+                                <td th:text="${user.id}">1</td>
+                                <td th:text="${user.username}">admin</td>
+                                <td th:text="${user.name}">管理员</td>
+                                <td th:text="${user.email}">admin@example.com</td>
+                                <td th:text="${user.phone}">13800138000</td>
+                                <td>
+                                    <span th:if="${user.status == 1}" style="color: green;">启用</span>
+                                    <span th:if="${user.status == 0}" style="color: red;">禁用</span>
+                                </td>
+                                <td th:text="${#temporals.format(user.createTime, 'yyyy-MM-dd HH:mm')}">2026-04-30</td>
+                                <td>
+                                    <a th:href="@{/user/form(id=${user.id})}" class="btn btn-primary" style="padding: 5px 10px; font-size: 12px;">编辑</a>
+                                    <form th:action="@{/user/delete/{id}(id=${user.id})}" method="post" style="display: inline;" onsubmit="return confirm('确定要删除吗？')">
+                                        <button type="submit" class="btn btn-danger" style="padding: 5px 10px; font-size: 12px;">删除</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="pagination" th:if="${page.pages > 1}">
+                        <a th:if="${page.current > 1}" th:href="@{/user(pageNum=${page.current - 1}, pageSize=${page.size}, keyword=${keyword})}">上一页</a>
+                        <span th:each="i : ${#numbers.sequence(1, page.pages)}">
+                            <a th:href="@{/user(pageNum=${i}, pageSize=${page.size}, keyword=${keyword})}" th:classappend="${i == page.current} ? 'active'" th:text="${i}">1</a>
+                        </span>
+                        <a th:if="${page.current < page.pages}" th:href="@{/user(pageNum=${page.current + 1}, pageSize=${page.size}, keyword=${keyword})}">下一页</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const sidebar = document.getElementById('sidebar');
+        const mainWrapper = document.getElementById('mainWrapper');
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        sidebarToggle.addEventListener('click', function() {
+            sidebar.classList.toggle('collapsed');
+            mainWrapper.classList.toggle('expanded');
+            if (sidebar.classList.contains('collapsed')) {
+                sidebarToggle.textContent = '▶';
+            } else {
+                sidebarToggle.textContent = '◀';
+            }
+        });
+    </script>
+</body>
+</html>

@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @Controller
-@RequestMapping("/admin/menu")
+@RequestMapping("/menu")
 public class MenuController {
     
     @Autowired
@@ -22,28 +22,24 @@ public class MenuController {
         if (keyword != null && !keyword.trim().isEmpty()) {
             menuList = menuService.search(keyword);
         } else {
-            menuList = menuService.list();
+            menuList = menuService.listWithSort();
         }
         model.addAttribute("menus", menuList);
         model.addAttribute("keyword", keyword);
-        return "admin/menu/index";
+        return "menu/index";
     }
     
     @GetMapping("/create")
     public String createForm(Model model) {
         model.addAttribute("menu", new Menu());
         model.addAttribute("action", "新增");
-        return "admin/menu/form";
+        return "menu/form";
     }
     
     @PostMapping("/save")
     public String save(@ModelAttribute Menu menu) {
-        if (menu.getId() == null) {
-            menuService.save(menu);
-        } else {
-            menuService.update(menu);
-        }
-        return "redirect:/admin/menu";
+        menuService.saveOrUpdate(menu);
+        return "redirect:/menu";
     }
     
     @GetMapping("/edit/{id}")
@@ -51,12 +47,12 @@ public class MenuController {
         Menu menu = menuService.getById(id);
         model.addAttribute("menu", menu);
         model.addAttribute("action", "编辑");
-        return "admin/menu/form";
+        return "menu/form";
     }
     
     @GetMapping("/delete/{id}")
     public String delete(@PathVariable Long id) {
-        menuService.delete(id);
-        return "redirect:/admin/menu";
+        menuService.removeById(id);
+        return "redirect:/menu";
     }
 }

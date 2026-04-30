@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @Controller
-@RequestMapping("/admin/role")
+@RequestMapping("/role")
 public class RoleController {
     
     @Autowired
@@ -26,24 +26,20 @@ public class RoleController {
         }
         model.addAttribute("roles", roleList);
         model.addAttribute("keyword", keyword);
-        return "admin/role/index";
+        return "role/index";
     }
     
     @GetMapping("/create")
     public String createForm(Model model) {
         model.addAttribute("role", new Role());
         model.addAttribute("action", "新增");
-        return "admin/role/form";
+        return "role/form";
     }
     
     @PostMapping("/save")
     public String save(@ModelAttribute Role role) {
-        if (role.getId() == null) {
-            roleService.save(role);
-        } else {
-            roleService.update(role);
-        }
-        return "redirect:/admin/role";
+        roleService.saveOrUpdate(role);
+        return "redirect:/role";
     }
     
     @GetMapping("/edit/{id}")
@@ -51,12 +47,12 @@ public class RoleController {
         Role role = roleService.getById(id);
         model.addAttribute("role", role);
         model.addAttribute("action", "编辑");
-        return "admin/role/form";
+        return "role/form";
     }
     
     @GetMapping("/delete/{id}")
     public String delete(@PathVariable Long id) {
-        roleService.delete(id);
-        return "redirect:/admin/role";
+        roleService.removeById(id);
+        return "redirect:/role";
     }
 }

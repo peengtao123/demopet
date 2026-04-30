@@ -1,11 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>登录 - 管理后台</title>
-    <link href="https://cdn.bootcdn.net/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.bootcdn.net/ajax/libs/bootstrap-icons/1.10.0/font/bootstrap-icons.min.css" rel="stylesheet">
+    <title>登录 - 电商后台管理员系统</title>
     <style>
         * {
             margin: 0;
@@ -14,350 +12,119 @@
         }
         
         body {
-            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
+            height: 100vh;
             display: flex;
-            align-items: center;
             justify-content: center;
-            overflow: hidden;
+            align-items: center;
         }
         
-        /* 背景动画 */
-        .bg-animation {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            overflow: hidden;
-        }
-        
-        .bg-animation .circle {
-            position: absolute;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.1);
-            animation: float 20s infinite;
-        }
-        
-        .bg-animation .circle:nth-child(1) {
-            width: 80px;
-            height: 80px;
-            left: 10%;
-            animation-delay: 0s;
-        }
-        
-        .bg-animation .circle:nth-child(2) {
-            width: 120px;
-            height: 120px;
-            left: 30%;
-            animation-delay: 2s;
-        }
-        
-        .bg-animation .circle:nth-child(3) {
-            width: 60px;
-            height: 60px;
-            left: 50%;
-            animation-delay: 4s;
-        }
-        
-        .bg-animation .circle:nth-child(4) {
-            width: 100px;
-            height: 100px;
-            left: 70%;
-            animation-delay: 6s;
-        }
-        
-        .bg-animation .circle:nth-child(5) {
-            width: 90px;
-            height: 90px;
-            left: 85%;
-            animation-delay: 8s;
-        }
-        
-        @keyframes float {
-            0% {
-                transform: translateY(100vh) rotate(0deg);
-                opacity: 0;
-            }
-            10% {
-                opacity: 1;
-            }
-            90% {
-                opacity: 1;
-            }
-            100% {
-                transform: translateY(-100vh) rotate(720deg);
-                opacity: 0;
-            }
-        }
-        
-        /* 登录卡片 */
         .login-container {
-            width: 100%;
-            max-width: 450px;
-            padding: 20px;
-            animation: slideIn 0.6s ease;
-        }
-        
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .login-card {
             background: white;
-            border-radius: 20px;
-            padding: 50px 40px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            width: 400px;
         }
         
-        .login-logo {
+        .login-header {
             text-align: center;
-            margin-bottom: 40px;
+            margin-bottom: 30px;
         }
         
-        .login-logo .logo-icon {
-            width: 80px;
-            height: 80px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 20px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2.5rem;
-            color: white;
-            margin-bottom: 20px;
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
-        }
-        
-        .login-logo h2 {
+        .login-header h1 {
             color: #333;
-            font-weight: 700;
-            font-size: 1.8rem;
-            margin: 0;
+            font-size: 28px;
+            margin-bottom: 10px;
         }
         
-        .login-logo p {
-            color: #999;
-            margin-top: 10px;
-            font-size: 0.95rem;
+        .login-header p {
+            color: #666;
+            font-size: 14px;
         }
         
         .form-group {
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
         
-        .form-label {
-            color: #555;
-            font-weight: 600;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
         }
         
-        .form-label i {
-            color: #667eea;
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s;
         }
         
-        .input-group {
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-        }
-        
-        .input-group-text {
-            background: white;
-            border: 2px solid #e8e8e8;
-            border-right: none;
-            border-radius: 12px 0 0 12px;
-            color: #999;
-            padding: 12px 15px;
-        }
-        
-        .form-control {
-            border: 2px solid #e8e8e8;
-            border-left: none;
-            border-radius: 0 12px 12px 0;
-            padding: 12px 15px;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-        }
-        
-        .form-control:focus {
+        .form-group input:focus {
+            outline: none;
             border-color: #667eea;
-            box-shadow: none;
         }
         
-        .form-control:focus + .input-group-text,
-        .input-group-text + .form-control:focus {
-            border-color: #667eea;
+        .error-message {
+            background: #fee;
+            color: #c33;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 14px;
         }
         
         .btn-login {
             width: 100%;
-            padding: 14px;
+            padding: 12px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
-            border-radius: 12px;
             color: white;
-            font-weight: 600;
-            font-size: 1.1rem;
-            transition: all 0.3s ease;
-            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
-            margin-top: 10px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s;
         }
         
         .btn-login:hover {
             transform: translateY(-2px);
-            box-shadow: 0 12px 30px rgba(102, 126, 234, 0.6);
         }
         
         .btn-login:active {
             transform: translateY(0);
         }
-        
-        .alert-error {
-            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            padding: 15px 20px;
-            margin-bottom: 25px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            animation: shake 0.5s ease;
-        }
-        
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-10px); }
-            75% { transform: translateX(10px); }
-        }
-        
-        .login-footer {
-            text-align: center;
-            margin-top: 30px;
-            color: rgba(255, 255, 255, 0.8);
-            font-size: 0.9rem;
-        }
-        
-        .password-toggle {
-            cursor: pointer;
-            color: #999;
-            transition: color 0.3s ease;
-        }
-        
-        .password-toggle:hover {
-            color: #667eea;
-        }
     </style>
 </head>
 <body>
-    <!-- 背景动画 -->
-    <div class="bg-animation">
-        <div class="circle"></div>
-        <div class="circle"></div>
-        <div class="circle"></div>
-        <div class="circle"></div>
-        <div class="circle"></div>
-    </div>
-    
-    <!-- 登录容器 -->
     <div class="login-container">
-        <div class="login-card">
-            <div class="login-logo">
-                <div class="logo-icon">
-                    <i class="bi bi-shield-lock-fill"></i>
-                </div>
-                <h2>管理后台</h2>
-                <p>欢迎回来，请登录您的账号</p>
-            </div>
-            
-            <!-- 错误提示 -->
-            <div th:if="${error}" class="alert alert-error">
-                <i class="bi bi-exclamation-circle-fill"></i>
-                <span th:text="${error}"></span>
-            </div>
-            
-            <!-- 登录表单 -->
-            <form method="post" action="/login">
-                <div class="form-group">
-                    <label class="form-label">
-                        <i class="bi bi-person-fill"></i>
-                        用户名
-                    </label>
-                    <div class="input-group">
-                        <span class="input-group-text">
-                            <i class="bi bi-person"></i>
-                        </span>
-                        <input type="text" 
-                               class="form-control" 
-                               name="username" 
-                               placeholder="请输入用户名"
-                               required
-                               autofocus>
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">
-                        <i class="bi bi-lock-fill"></i>
-                        密码
-                    </label>
-                    <div class="input-group">
-                        <span class="input-group-text">
-                            <i class="bi bi-lock"></i>
-                        </span>
-                        <input type="password" 
-                               class="form-control" 
-                               name="password" 
-                               id="password"
-                               placeholder="请输入密码"
-                               required>
-                        <span class="input-group-text password-toggle" onclick="togglePassword()">
-                            <i class="bi bi-eye-slash" id="toggleIcon"></i>
-                        </span>
-                    </div>
-                </div>
-                
-                <button type="submit" class="btn btn-login">
-                    <i class="bi bi-box-arrow-in-right"></i>
-                    登 录
-                </button>
-            </form>
+        <div class="login-header">
+            <h1>电商后台管理员系统</h1>
+            <p>E-Commerce Admin System</p>
         </div>
         
-        <div class="login-footer">
-            <p>&copy; 2024 管理后台系统. All rights reserved.</p>
+        <div th:if="${error}" class="error-message">
+            <span th:text="${error}"></span>
         </div>
-    </div>
-    
-    <script src="https://cdn.bootcdn.net/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
-    <script>
-        function togglePassword() {
-            const passwordInput = document.getElementById('password');
-            const toggleIcon = document.getElementById('toggleIcon');
+        
+        <form th:action="@{/login}" method="post">
+            <div class="form-group">
+                <label for="username">用户名</label>
+                <input type="text" id="username" name="username" required 
+                       placeholder="请输入用户名">
+            </div>
             
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                toggleIcon.classList.remove('bi-eye-slash');
-                toggleIcon.classList.add('bi-eye');
-            } else {
-                passwordInput.type = 'password';
-                toggleIcon.classList.remove('bi-eye');
-                toggleIcon.classList.add('bi-eye-slash');
-            }
-        }
-    </script>
+            <div class="form-group">
+                <label for="password">密码</label>
+                <input type="password" id="password" name="password" required 
+                       placeholder="请输入密码">
+            </div>
+            
+            <button type="submit" class="btn-login">登录</button>
+        </form>
+    </div>
 </body>
 </html>

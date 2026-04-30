@@ -1,37 +1,160 @@
-DROP TABLE IF EXISTS `user`;
+-- =============================================
+-- 电商后台管理系统 - 数据库表结构
+-- =============================================
 
+-- 1. 用户表
+DROP TABLE IF EXISTS `user`;
 CREATE TABLE `user`
 (
     id BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    username VARCHAR(50) NOT NULL COMMENT '用户名',
+    password VARCHAR(100) NOT NULL COMMENT '密码',
     name VARCHAR(30) NULL DEFAULT NULL COMMENT '姓名',
-    age INT NULL DEFAULT NULL COMMENT '年龄',
     email VARCHAR(50) NULL DEFAULT NULL COMMENT '邮箱',
-    username VARCHAR(50) NULL DEFAULT NULL COMMENT '用户名',
-    password VARCHAR(100) NULL DEFAULT NULL COMMENT '密码',
-    PRIMARY KEY (id)
+    phone VARCHAR(20) NULL DEFAULT NULL COMMENT '手机号',
+    avatar VARCHAR(200) NULL DEFAULT NULL COMMENT '头像',
+    status TINYINT NULL DEFAULT 1 COMMENT '状态: 0-禁用, 1-启用',
+    create_time DATETIME NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_time DATETIME NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_username (username)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户表';
 
+-- 2. 角色表
 DROP TABLE IF EXISTS `role`;
-
 CREATE TABLE `role`
 (
     id BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-    role_name VARCHAR(50) NULL DEFAULT NULL COMMENT '角色名称',
-    role_code VARCHAR(50) NULL DEFAULT NULL COMMENT '角色编码',
+    role_name VARCHAR(50) NOT NULL COMMENT '角色名称',
+    role_code VARCHAR(50) NOT NULL COMMENT '角色编码',
     description VARCHAR(200) NULL DEFAULT NULL COMMENT '角色描述',
-    PRIMARY KEY (id)
+    status TINYINT NULL DEFAULT 1 COMMENT '状态: 0-禁用, 1-启用',
+    create_time DATETIME NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_time DATETIME NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_role_code (role_code)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='角色表';
 
+-- 3. 菜单表
 DROP TABLE IF EXISTS `menu`;
-
 CREATE TABLE `menu`
 (
     id BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-    menu_name VARCHAR(50) NULL DEFAULT NULL COMMENT '菜单名称',
-    menu_code VARCHAR(50) NULL DEFAULT NULL COMMENT '菜单编码',
-    parent_id VARCHAR(20) NULL DEFAULT '0' COMMENT '父级ID',
+    menu_name VARCHAR(50) NOT NULL COMMENT '菜单名称',
+    menu_code VARCHAR(50) NOT NULL COMMENT '菜单编码',
+    parent_id BIGINT NULL DEFAULT 0 COMMENT '父级ID',
     path VARCHAR(100) NULL DEFAULT NULL COMMENT '菜单路径',
+    component VARCHAR(100) NULL DEFAULT NULL COMMENT '组件路径',
     sort INT NULL DEFAULT 0 COMMENT '排序',
     icon VARCHAR(50) NULL DEFAULT NULL COMMENT '图标',
+    menu_type TINYINT NULL DEFAULT 1 COMMENT '菜单类型: 1-目录, 2-菜单, 3-按钮',
+    permission VARCHAR(100) NULL DEFAULT NULL COMMENT '权限标识',
+    status TINYINT NULL DEFAULT 1 COMMENT '状态: 0-禁用, 1-启用',
+    create_time DATETIME NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_time DATETIME NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='菜单表';
+
+-- 4. 用户角色关联表
+DROP TABLE IF EXISTS `user_role`;
+CREATE TABLE `user_role`
+(
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    user_id BIGINT NOT NULL COMMENT '用户ID',
+    role_id BIGINT NOT NULL COMMENT '角色ID',
+    create_time DATETIME NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_user_role (user_id, role_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户角色关联表';
+
+-- 5. 角色菜单关联表
+DROP TABLE IF EXISTS `role_menu`;
+CREATE TABLE `role_menu`
+(
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    role_id BIGINT NOT NULL COMMENT '角色ID',
+    menu_id BIGINT NOT NULL COMMENT '菜单ID',
+    create_time DATETIME NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_role_menu (role_id, menu_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='角色菜单关联表';
+
+-- 6. 商品分类表
+DROP TABLE IF EXISTS `product_category`;
+CREATE TABLE `product_category`
+(
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    category_name VARCHAR(50) NOT NULL COMMENT '分类名称',
+    parent_id BIGINT NULL DEFAULT 0 COMMENT '父级ID',
+    sort INT NULL DEFAULT 0 COMMENT '排序',
+    icon VARCHAR(100) NULL DEFAULT NULL COMMENT '图标',
+    status TINYINT NULL DEFAULT 1 COMMENT '状态: 0-禁用, 1-启用',
+    create_time DATETIME NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_time DATETIME NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='商品分类表';
+
+-- 7. 商品表
+DROP TABLE IF EXISTS `product`;
+CREATE TABLE `product`
+(
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    product_name VARCHAR(100) NOT NULL COMMENT '商品名称',
+    product_code VARCHAR(50) NOT NULL COMMENT '商品编码',
+    category_id BIGINT NULL DEFAULT NULL COMMENT '分类ID',
+    price DECIMAL(10,2) NOT NULL COMMENT '价格',
+    original_price DECIMAL(10,2) NULL DEFAULT NULL COMMENT '原价',
+    stock INT NULL DEFAULT 0 COMMENT '库存',
+    sales INT NULL DEFAULT 0 COMMENT '销量',
+    description TEXT NULL DEFAULT NULL COMMENT '商品描述',
+    main_image VARCHAR(200) NULL DEFAULT NULL COMMENT '主图URL',
+    image_url VARCHAR(200) NULL DEFAULT NULL COMMENT '图片URL',
+    images TEXT NULL DEFAULT NULL COMMENT '图片列表(JSON)',
+    status TINYINT NULL DEFAULT 1 COMMENT '状态: 0-下架, 1-上架',
+    create_time DATETIME NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_time DATETIME NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_product_code (product_code)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='商品表';
+
+-- 8. 订单表
+DROP TABLE IF EXISTS `orders`;
+CREATE TABLE `orders`
+(
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    order_no VARCHAR(50) NOT NULL COMMENT '订单号',
+    user_id BIGINT NOT NULL COMMENT '用户ID',
+    total_amount DECIMAL(10,2) NOT NULL COMMENT '订单总金额',
+    pay_amount DECIMAL(10,2) NULL DEFAULT NULL COMMENT '实付金额',
+    freight_amount DECIMAL(10,2) NULL DEFAULT 0.00 COMMENT '运费',
+    status TINYINT NULL DEFAULT 0 COMMENT '订单状态: 0-待支付, 1-已支付, 2-已发货, 3-已完成, 4-已取消',
+    payment_type TINYINT NULL DEFAULT NULL COMMENT '支付方式: 1-支付宝, 2-微信, 3-银行卡',
+    payment_time DATETIME NULL DEFAULT NULL COMMENT '支付时间',
+    delivery_time DATETIME NULL DEFAULT NULL COMMENT '发货时间',
+    receive_time DATETIME NULL DEFAULT NULL COMMENT '收货时间',
+    receiver_name VARCHAR(50) NULL DEFAULT NULL COMMENT '收货人姓名',
+    receiver_phone VARCHAR(20) NULL DEFAULT NULL COMMENT '收货人电话',
+    receiver_address VARCHAR(200) NULL DEFAULT NULL COMMENT '收货地址',
+    remark VARCHAR(500) NULL DEFAULT NULL COMMENT '订单备注',
+    create_time DATETIME NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_time DATETIME NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_order_no (order_no)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='订单表';
+
+-- 9. 订单项表
+DROP TABLE IF EXISTS `order_item`;
+CREATE TABLE `order_item`
+(
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    order_id BIGINT NOT NULL COMMENT '订单ID',
+    product_id BIGINT NOT NULL COMMENT '商品ID',
+    product_name VARCHAR(100) NOT NULL COMMENT '商品名称',
+    product_code VARCHAR(50) NOT NULL COMMENT '商品编码',
+    product_image VARCHAR(200) NULL DEFAULT NULL COMMENT '商品图片',
+    price DECIMAL(10,2) NOT NULL COMMENT '商品价格',
+    quantity INT NOT NULL COMMENT '购买数量',
+    total_amount DECIMAL(10,2) NOT NULL COMMENT '小计金额',
+    create_time DATETIME NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='订单项表';
