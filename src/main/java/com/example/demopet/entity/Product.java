@@ -13,6 +13,7 @@ public class Product {
     private String productCode; // 商品编码
     private BigDecimal price; // 价格
     private Integer stock; // 库存
+    private Integer sales; // 销量
     private String description; // 描述
     private String imageUrl; // 图片URL
     private Integer status; // 状态: 0-下架, 1-上架
