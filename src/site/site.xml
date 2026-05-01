@@ -33,14 +33,6 @@
             <item name="首页" href="index.html"/>
         </menu>
         
-        <menu name="项目报告" inherit="top">
-            <item name="依赖信息" href="dependencies.html"/>
-            <item name="依赖树" href="dependency-analysis.html"/>
-            <item name="插件信息" href="plugins.html"/>
-            <item name="源码交叉引用" href="xref/index.html"/>
-            <item name="测试报告" href="surefire-report.html"/>
-        </menu>
-        
         <!-- 侧边栏链接 -->
         <menu ref="reports"/>
         
