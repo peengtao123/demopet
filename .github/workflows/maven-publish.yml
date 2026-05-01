@@ -2,7 +2,7 @@ name: Deploy Maven Site
 
 on:
   push:
-    branches: [ "main" ]  # 监听 main 分支
+    branches: [ "master" ]  # 监听 main 分支
 
 permissions:
   contents: write
